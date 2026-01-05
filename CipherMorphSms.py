@@ -1,0 +1,77 @@
+import sys
+#-------------------------------------------
+# parsa kraken  (cipher morph sms )
+#-------------------------------------------
+
+digit_to_letter = {'0': 'q','1': 'w','2': 'e','3': 'r','4': 't','5': 'y','6': 'u','7': 'i','8': 'o','9': 'p'}
+letter_to_digit = {v: k for k, v in digit_to_letter.items()}
+
+def atbash_char(ch: str) -> str:
+    if 'a' <= ch <= 'z':
+        return chr(ord('z') - (ord(ch) - ord('a')))
+    if 'A' <= ch <= 'Z':
+        return chr(ord('Z') - (ord(ch) - ord('A')))
+    return ch
+
+symbol_map_enc = {':':'#','/':'*','.' :'~','-':'=','_':'+','?':'!','&':'%','@':'$'}
+symbol_map_dec = {v: k for k, v in symbol_map_enc.items()}
+
+def substitute_encode(text: str) -> str:
+    return ''.join(
+        digit_to_letter[ch] if ch.isdigit() else
+        atbash_char(ch) if ('a' <= ch <= 'z') or ('A' <= ch <= 'Z') else
+        symbol_map_enc.get(ch, ch)
+        for ch in text
+    )
+
+def substitute_decode(text: str) -> str:
+    return ''.join(
+        letter_to_digit[ch] if ch in letter_to_digit else
+        atbash_char(ch) if ('a' <= ch <= 'z') or ('A' <= ch <= 'Z') else
+        symbol_map_dec.get(ch, ch)
+        for ch in text
+    )
+
+def normalize_prefix_once(text: str) -> str:
+    return "1" + text[len("vless://"):] if text.startswith("vless://") else text
+
+def denormalize_prefix_once(text: str) -> str:
+    return "vless://" + text[1:] if text.startswith("1") else text
+
+def encrypt_message(plain: str) -> str:
+    normalized = normalize_prefix_once(plain)
+    return substitute_encode(normalized)
+
+def decrypt_message(ciphertext: str) -> str:
+    normalized = substitute_decode(ciphertext)
+    return denormalize_prefix_once(normalized)
+
+def main():
+    print("1- Encrypt 🔐")
+    print("2- Decrypt 🔓")
+    choice = input("Your choice: ").strip()
+    if choice == "1":
+        msg = input("Enter message: ").strip()
+        print("Encrypted Output 📤:")
+        print(encrypt_message(msg))
+    elif choice == "2":
+        msg = input("Enter encrypted text: ").strip()
+        print("Decrypted Output 📥:")
+        print(decrypt_message(msg))
+    else:
+        print("Invalid option ❌")
+
+if __name__ == "__main__":
+    if len(sys.argv) >= 3 and sys.argv[1] in ("enc", "dec"):
+        mode, a = sys.argv[1], sys.argv[2]
+        if mode == "enc":
+            print("Encrypted Output 📤:")
+            print(encrypt_message(a))
+        else:
+            print("Decrypted Output 📥:")
+            print(decrypt_message(a))
+    else:
+        main()
+#-------------------------------------------
+# parsa kraken  (cipher morph sms )
+#-------------------------------------------
